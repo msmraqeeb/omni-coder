@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import styles from './page.module.css';
 import { Sparkles } from 'lucide-react';
 import SolutionViewer from '../components/SolutionViewer';
+import Footer from '../components/Footer';
 
 export default function Home() {
   const [input, setInput] = useState('');
@@ -99,6 +100,7 @@ export default function Home() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

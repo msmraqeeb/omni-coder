@@ -49,3 +49,13 @@
 .button:hover {
     opacity: 0.9;
 }
+
+@media (max-width: 768px) {
+    .header {
+        padding: 0.75rem 1rem;
+    }
+
+    .logo {
+        font-size: 1.25rem;
+    }
+}

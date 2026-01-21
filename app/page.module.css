@@ -117,3 +117,24 @@
   color: rgb(var(--muted-foreground));
   text-align: center;
 }
+
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .pane {
+    height: auto;
+    min-height: 400px;
+    /* Ensure enough space for editor */
+  }
+
+  .solveButton {
+    width: 100%;
+  }
+
+  .languageSelect {
+    width: 100%;
+  }
+}
