@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CodeBlock from './CodeBlock';
 import WebPreview from './WebPreview';
 import styles from './SolutionViewer.module.css';
@@ -8,6 +8,11 @@ export default function SolutionViewer({ solution }) {
     const [activeTab, setActiveTab] = useState('preview');
     // logic mode state
     const [output, setOutput] = useState('');
+
+    // Reset output when solution changes
+    useEffect(() => {
+        setOutput('');
+    }, [solution]);
 
     const handleRun = async () => {
         if (!solution || !solution.code) return;
