@@ -1,0 +1,119 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  /* Mobile first: stack */
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .main {
+    flex-direction: row;
+  }
+}
+
+.pane {
+  flex: 1;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  border-bottom: 1px solid rgb(var(--border));
+}
+
+@media (min-width: 768px) {
+  .pane {
+    border-bottom: none;
+    border-right: 1px solid rgb(var(--border));
+    height: calc(100vh - 70px);
+    /* Subtract header height approx */
+  }
+
+  .pane:last-child {
+    border-right: none;
+  }
+}
+
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 1rem;
+}
+
+.textarea {
+  flex: 1;
+  background: rgb(var(--card));
+  color: rgb(var(--foreground));
+  border: 1px solid rgb(var(--border));
+  border-radius: var(--radius);
+  padding: 1rem;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 1rem;
+  resize: none;
+  border-radius: var(--radius);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.textarea:focus {
+  border-color: rgb(var(--ring));
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+}
+
+.languageSelect {
+  flex: 1;
+  background: rgb(var(--card));
+  color: rgb(var(--foreground));
+  border: 1px solid rgb(var(--border));
+  padding: 1rem;
+  border-radius: var(--radius);
+  outline: none;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.solveButton {
+  background: rgb(var(--primary));
+  color: rgb(var(--primary-foreground));
+  border: none;
+  padding: 1rem;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: opacity 0.2s;
+}
+
+.solveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.solutionContainer {
+  height: 100%;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: rgb(var(--muted-foreground));
+  text-align: center;
+}

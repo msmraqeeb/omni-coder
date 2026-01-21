@@ -1,0 +1,92 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgb(var(--border));
+    padding-bottom: 0.5rem;
+}
+
+.tab {
+    background: transparent;
+    border: none;
+    color: rgb(var(--muted-foreground));
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: 500;
+    border-radius: var(--radius);
+    transition: all 0.2s;
+}
+
+.tab:hover {
+    color: rgb(var(--foreground));
+    background: rgb(var(--accent));
+}
+
+.activeTab {
+    color: rgb(var(--primary-foreground));
+    background: rgb(var(--primary));
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+}
+
+.section {
+    margin-bottom: 1.5rem;
+}
+
+.title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: rgb(var(--foreground));
+}
+
+.text {
+    line-height: 1.6;
+    color: rgb(var(--foreground));
+    white-space: pre-wrap;
+}
+
+.meta {
+    background: rgb(var(--card));
+    padding: 1rem;
+    border-radius: var(--radius);
+    border: 1px solid rgb(var(--border));
+    margin-top: 1rem;
+}
+
+.runButton {
+    background: rgb(var(--primary));
+    color: rgb(var(--primary-foreground));
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    transition: background 0.2s;
+}
+
+.runButton:hover {
+    opacity: 0.9;
+}
+
+.output {
+    background: rgb(var(--background));
+    border: 1px solid rgb(var(--border));
+    padding: 1rem;
+    border-radius: var(--radius);
+    font-family: monospace;
+    white-space: pre-wrap;
+    margin-top: 0.5rem;
+    color: rgb(var(--foreground));
+}
