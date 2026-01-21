@@ -8,15 +8,18 @@ export default function SolutionViewer({ solution }) {
     const [activeTab, setActiveTab] = useState('preview');
     // logic mode state
     const [output, setOutput] = useState('');
+    const [showRunView, setShowRunView] = useState(false); // Mobile only: toggles execution view
 
     // Reset output when solution changes
     useEffect(() => {
         setOutput('');
+        setShowRunView(false);
     }, [solution]);
 
     const handleRun = async () => {
         if (!solution || !solution.code) return;
 
+        setShowRunView(true); // Switch to run view on mobile
         setOutput('Running...');
 
         const lang = solution.language ? solution.language.toLowerCase() : 'text';
@@ -79,28 +82,44 @@ export default function SolutionViewer({ solution }) {
         return (
             <div className={styles.container}>
                 <div className={styles.content}>
-                    <div className={styles.section}>
-                        <h3 className={styles.title}>Explanation</h3>
-                        <div className={styles.text}>{solution.explanation}</div>
-                    </div>
-
-                    <div className={styles.section}>
-                        <h3 className={styles.title}>Solution Code</h3>
-                        <CodeBlock code={solution.code} language={solution.language || 'javascript'} />
-                    </div>
-
-                    {solution.complexity && (
-                        <div className={styles.meta}>
-                            <strong>Complexity Analysis:</strong>
-                            <div className={styles.text}>{solution.complexity}</div>
+                    {/* Hide explanation and code when in Run View on Mobile */}
+                    <div className={showRunView ? styles.mobileHidden : ''}>
+                        <div className={styles.section}>
+                            <h3 className={styles.title}>Explanation</h3>
+                            <div className={styles.text}>{solution.explanation}</div>
                         </div>
-                    )}
 
-                    <div className={styles.section} style={{ marginTop: '1.5rem' }}>
+                        <div className={styles.section}>
+                            <h3 className={styles.title}>Solution Code</h3>
+                            <CodeBlock code={solution.code} language={solution.language || 'javascript'} />
+                        </div>
+
+                        {solution.complexity && (
+                            <div className={styles.meta}>
+                                <strong>Complexity Analysis:</strong>
+                                <div className={styles.text}>{solution.complexity}</div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className={`${styles.section} ${!showRunView ? '' : styles.mobileFullRun}`} style={{ marginTop: '1.5rem' }}>
+
+                        {/* Mobile Back Button for Run View */}
+                        {showRunView && (
+                            <button
+                                className={styles.mobileBackBtn}
+                                onClick={() => setShowRunView(false)}
+                            >
+                                ← Back to Solution
+                            </button>
+                        )}
+
                         <h3 className={styles.title}>Run Code</h3>
-                        <button className={styles.runButton} onClick={handleRun}>Run Code</button>
-                        {output && (
-                            <div className={styles.output}>
+                        {/* Hide Run button if already in run view on mobile (optional, but requested flow implies switching views) */}
+                        <button className={`${styles.runButton} ${showRunView ? styles.mobileHidden : ''}`} onClick={handleRun}>Run Code</button>
+
+                        {(showRunView || output) && (
+                            <div className={styles.output} style={showRunView ? { minHeight: '200px' } : {}}>
                                 <strong>Output:</strong>
                                 <div>{output}</div>
                             </div>

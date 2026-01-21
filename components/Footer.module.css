@@ -36,4 +36,23 @@
         display: inline-block;
         margin-left: 0;
     }
+
+    .mobileHidden {
+        display: none !important;
+    }
+
+    .mobileBackBtn {
+        background: transparent;
+        border: 1px solid rgb(var(--border));
+        color: rgb(var(--foreground));
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+        justify-content: center;
+    }
 }

@@ -1,25 +1,26 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Groq from "groq-sdk";
 import { NextResponse } from 'next/server';
+
+const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY,
+});
 
 export async function POST(req) {
     try {
-        const { prompt, language } = await req.json();
-        const apiKey = process.env.GEMINI_API_KEY;
+        const payload = await req.json();
+        // Support both existing frontend ({prompt, language}) and user's requested format ({problem, code})
+        const promptInput = payload.prompt || payload.problem || "";
+        const codeInput = payload.code || ""; // User's requested format includes code separately
+        const language = payload.language || 'auto';
 
-        if (!apiKey) {
-            console.warn("GEMINI_API_KEY is missing. Using mock response.");
-            // Minimal mock for testing without key
+        if (!process.env.GROQ_API_KEY) {
             return NextResponse.json({
                 type: 'logic',
-                explanation: '## No API Key Configured\n\nPlease add `GEMINI_API_KEY` to your `.env.local` file to use the real AI.\n\nCurrently running in **Mock Mode**.',
-                code: `// .env.local\nGEMINI_API_KEY=your_api_key_here`,
-                language: 'bash',
-                complexity: 'N/A'
+                explanation: '**Error**: GROQ_API_KEY is missing in .env.local',
+                code: '',
+                language: 'text'
             });
         }
-
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
         const systemPrompt = `
       You are Omni Coder, an expert full-stack developer and algorithm specialist.
@@ -50,30 +51,65 @@ export async function POST(req) {
       - Code should be complete and runnable.
     `;
 
-        let fullPrompt = `User Prompt: ${prompt}`;
+        let fullPrompt = `User Prompt: ${promptInput}`;
+
+        if (codeInput) {
+            fullPrompt += `\n\nCode Context:\n${codeInput}`;
+        }
+
         if (language && language !== 'auto') {
             fullPrompt += `\n\nTarget Language: ${language}`;
         }
 
-        const result = await model.generateContent([systemPrompt, fullPrompt]);
-        const responseText = result.response.text();
+        const chatCompletion = await groq.chat.completions.create({
+            messages: [
+                {
+                    role: "system",
+                    content: systemPrompt
+                },
+                {
+                    role: "user",
+                    content: fullPrompt,
+                },
+            ],
+            model: "llama-3.3-70b-versatile",
+            temperature: 0.1, // Lower temperature for more consistent JSON
+            max_tokens: 2048,
+            response_format: { type: "json_object" } // Force JSON mode if supported strictly, otherwise prompt does it
+        });
 
-        // Cleanup potential markdown fences if model disobeys
+        const responseText = chatCompletion.choices[0]?.message?.content || "";
+
+        // Cleanup potential markdown fences if model disobeys (though json_object format helps)
         const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
 
-        const data = JSON.parse(cleanJson);
+        // Attempt parsing
+        let data;
+        try {
+            data = JSON.parse(cleanJson);
+        } catch (parseError) {
+            console.error("JSON Parse Error:", parseError, "Raw:", responseText);
+            // Fallback if JSON is broken but contains meaningful text
+            data = {
+                type: 'logic',
+                explanation: responseText,
+                code: '',
+                language: 'text'
+            };
+        }
+
         return NextResponse.json(data);
 
     } catch (error) {
-        console.error("Gemini API Error:", error);
+        console.error("Groq API Error:", error);
         return NextResponse.json(
             {
                 type: 'logic',
-                explanation: `**Error**: ${error.message}\n\nPlease try again.`,
+                explanation: `**Groq API Error**: ${error.message}\n\nPlease check your API key and connection.`,
                 code: '',
                 language: 'text'
             },
-            { status: 200 } // Return 200 so UI handles it gracefully as a logic response
+            { status: 200 }
         );
     }
 }

@@ -126,8 +126,20 @@
 
   .pane {
     height: auto;
-    min-height: 400px;
-    /* Ensure enough space for editor */
+    min-height: calc(100vh - 140px);
+    /* Fill screen minus header/footer approx */
+    display: flex;
+    flex-direction: column;
+  }
+
+  .inputContainer {
+    flex: 1;
+  }
+
+  .textarea {
+    flex: 1;
+    min-height: 300px;
+    /* Ensure decent minimum height */
   }
 
   .solveButton {
@@ -136,5 +148,9 @@
 
   .languageSelect {
     width: 100%;
+  }
+
+  .mobileHidden {
+    display: none !important;
   }
 }
