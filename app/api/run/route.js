@@ -1,9 +1,7 @@
 import Groq from "groq-sdk";
 import { NextResponse } from 'next/server';
 
-const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY,
-});
+
 
 export async function POST(req) {
     try {
@@ -14,6 +12,10 @@ export async function POST(req) {
                 output: "Error: GROQ_API_KEY is missing."
             });
         }
+
+        const groq = new Groq({
+            apiKey: process.env.GROQ_API_KEY,
+        });
 
         const systemPrompt = `
             You are a code execution engine.
