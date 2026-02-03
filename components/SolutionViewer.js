@@ -1,14 +1,21 @@
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import CodeBlock from './CodeBlock';
 import WebPreview from './WebPreview';
 import styles from './SolutionViewer.module.css';
 
 export default function SolutionViewer({ solution }) {
+    const router = useRouter();
     // web mode state
     const [activeTab, setActiveTab] = useState('preview');
     // logic mode state
     const [output, setOutput] = useState('');
-    const [showRunView, setShowRunView] = useState(false); // Mobile only: toggles execution view
+    const [accumulatedStdin, setAccumulatedStdin] = useState(''); // All inputs sent so far
+    const [currentInput, setCurrentInput] = useState(''); // Current input user is typing
+    const [waitingForInput, setWaitingForInput] = useState(false);
+    const [isRunning, setIsRunning] = useState(false);
+
+    const [showRunView, setShowRunView] = useState(false); // Mobile only
 
     // Reset output when solution changes
     useEffect(() => {
@@ -16,114 +23,95 @@ export default function SolutionViewer({ solution }) {
         setShowRunView(false);
     }, [solution]);
 
-    const handleRun = async () => {
-        if (!solution || !solution.code) return;
-
-        setShowRunView(true); // Switch to run view on mobile
-        setOutput('Running...');
-
+    const executeCode = async (stdinValue) => {
         const lang = solution.language ? solution.language.toLowerCase() : 'text';
+        setIsRunning(true);
+        setWaitingForInput(false);
 
+        // For simple JS client-side execution (non-interactive mostly)
         if (lang === 'javascript' || lang === 'js') {
+            // ... (client side JS runner logic remains similar but simplified context)
             try {
-                // safer capture of console.log
                 let logs = [];
                 const originalLog = console.log;
                 console.log = (...args) => {
                     logs.push(args.map(a => String(a)).join(' '));
                     originalLog(...args);
                 };
-
-                // Create a function from the code and run it
-                // We wrap it in an async IIFE to support await if needed, though strictly we construct a Function
-                // This is a basic client-side runner
                 const run = new Function(solution.code);
                 run();
-
                 console.log = originalLog;
-
-                if (logs.length > 0) {
-                    setOutput(logs.join('\n'));
-                } else {
-                    setOutput('Code executed successfully (no output).');
-                }
+                setOutput(logs.join('\n') || 'Code executed successfully.');
+                setIsRunning(false);
             } catch (err) {
                 setOutput(`Error: ${err.message}`);
+                setIsRunning(false);
             }
-        } else {
-            // Server-side simulation for other languages
-            try {
-                const response = await fetch('/api/run', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        code: solution.code,
-                        language: lang
-                    }),
-                });
+            return;
+        }
 
-                const data = await response.json();
-                if (data.output) {
-                    setOutput(data.output);
-                } else {
-                    setOutput('No output received.');
-                }
-            } catch (err) {
-                setOutput(`Execution Error: ${err.message}`);
+        // Server-side interactive execution
+        try {
+            const response = await fetch('/api/run', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    code: solution.code,
+                    language: lang,
+                    stdin: stdinValue
+                }),
+            });
+
+            const data = await response.json();
+            let rawOutput = data.output || 'No output.';
+
+            // Check for waiting token
+            if (rawOutput.includes('<WAITING_FOR_INPUT>')) {
+                setWaitingForInput(true);
+                rawOutput = rawOutput.replace('<WAITING_FOR_INPUT>', '').trimEnd();
             }
+
+            setOutput(rawOutput);
+
+        } catch (err) {
+            setOutput(prev => prev + `\nExecution Error: ${err.message}`);
+        } finally {
+            setIsRunning(false);
         }
     };
 
-    if (!solution) return null;
+    const handleRunRedirect = () => {
+        // Save code and language to localStorage
+        localStorage.setItem('omni_run_code', solution.code);
+        localStorage.setItem('omni_run_lang', solution.language ? solution.language.toLowerCase() : 'text');
+
+        // Redirect to run page
+        router.push('/run');
+    };
 
     if (solution.type === 'logic') {
         return (
             <div className={styles.container}>
                 <div className={styles.content}>
-                    {/* Hide explanation and code when in Run View on Mobile */}
-                    <div className={showRunView ? styles.mobileHidden : ''}>
-                        <div className={styles.section}>
-                            <h3 className={styles.title}>Explanation</h3>
-                            <div className={styles.text}>{solution.explanation}</div>
-                        </div>
-
-                        <div className={styles.section}>
-                            <h3 className={styles.title}>Solution Code</h3>
-                            <CodeBlock code={solution.code} language={solution.language || 'javascript'} />
-                        </div>
-
-                        {solution.complexity && (
-                            <div className={styles.meta}>
-                                <strong>Complexity Analysis:</strong>
-                                <div className={styles.text}>{solution.complexity}</div>
-                            </div>
-                        )}
+                    <div className={styles.section}>
+                        <h3 className={styles.title}>Solution Code</h3>
+                        <CodeBlock code={solution.code} language={solution.language || 'javascript'} />
                     </div>
 
-                    <div className={`${styles.section} ${!showRunView ? '' : styles.mobileFullRun}`} style={{ marginTop: '1.5rem' }}>
+                    {solution.complexity && (
+                        <div className={styles.meta}>
+                            <strong>Complexity Analysis:</strong>
+                            <div className={styles.text}>{solution.complexity}</div>
+                        </div>
+                    )}
 
-                        {/* Mobile Back Button for Run View */}
-                        {showRunView && (
-                            <button
-                                className={styles.mobileBackBtn}
-                                onClick={() => setShowRunView(false)}
-                            >
-                                ← Back to Solution
-                            </button>
-                        )}
-
-                        <h3 className={styles.title}>Run Code</h3>
-                        {/* Hide Run button if already in run view on mobile (optional, but requested flow implies switching views) */}
-                        <button className={`${styles.runButton} ${showRunView ? styles.mobileHidden : ''}`} onClick={handleRun}>Run Code</button>
-
-                        {(showRunView || output) && (
-                            <div className={styles.output} style={showRunView ? { minHeight: '200px' } : {}}>
-                                <strong>Output:</strong>
-                                <div>{output}</div>
-                            </div>
-                        )}
+                    <div style={{ marginTop: '2rem' }}>
+                        <button
+                            className={styles.runButton}
+                            onClick={handleRunRedirect}
+                        >
+                            Run Code in Playground
+                        </button>
                     </div>
                 </div>
             </div>

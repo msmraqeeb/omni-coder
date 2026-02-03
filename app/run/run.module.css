@@ -1,0 +1,142 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: #0d0d0d;
+    color: #e0e0e0;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #1a1a1a;
+    border-bottom: 1px solid #333;
+}
+
+.title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+}
+
+.controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.select {
+    background: #333;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.runButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #0070f3;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.runButton:hover {
+    background: #0060df;
+}
+
+.runButton:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.editorSection {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #333;
+    background: #111;
+}
+
+.editor {
+    flex: 1;
+    width: 100%;
+    background: #111;
+    color: #f8f8f2;
+    border: none;
+    padding: 1.5rem;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: none;
+    outline: none;
+}
+
+.outputSection {
+    flex: 0 0 40%;
+    display: flex;
+    flex-direction: column;
+    background: #0a0a0a;
+}
+
+.outputHeader {
+    padding: 0.8rem 1.5rem;
+    background: #151515;
+    border-bottom: 1px solid #333;
+    font-size: 0.9rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.terminal {
+    flex: 1;
+    padding: 1.5rem;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 14px;
+    overflow-y: auto;
+    cursor: text;
+}
+
+.waitingBlob {
+    display: inline-block;
+    width: 8px;
+    height: 16px;
+    background-color: #fff;
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+    margin-left: 4px;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+@media (max-width: 768px) {
+    .main {
+        flex-direction: column;
+    }
+    
+    .editorSection, .outputSection {
+        flex: 1;
+        border-right: none;
+        border-bottom: 1px solid #333;
+    }
+}

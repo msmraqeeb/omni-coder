@@ -58,6 +58,9 @@ export default function Home() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
             />
+            <div style={{ padding: '0 1rem', marginBottom: '0.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+              <a href="/run" style={{ color: '#0070f3', textDecoration: 'none', fontSize: '0.9rem' }}>Go to Playground &rarr;</a>
+            </div>
             <div className={styles.controls}>
               <select
                 className={styles.languageSelect}
